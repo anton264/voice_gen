@@ -2,13 +2,17 @@
 
 import csv
 import os
+import numpy as np
+from bark import SAMPLE_RATE, generate_audio
 
 from pydub import AudioSegment
 from pydub.silence import detect_nonsilent
+import simpleaudio as sa
+from scipy.io.wavfile import write as write_wav
 
 
 def remove_silence_from_audio(audio_file_path, output_file_path, silence_threshold=-40.0, min_silence_len=100):
-    print(f"Processing {audio_file_path} -> {output_file_path}...")
+    print(f"Removing silence {audio_file_path} -> {output_file_path}...")
     audio = AudioSegment.from_wav(audio_file_path)
     non_silent_ranges = detect_nonsilent(audio, min_silence_len, silence_threshold)
 
@@ -46,11 +50,11 @@ def find_csvs(path):
     return csvs
 
 
-def get_dir(csv):
+def get_dir(csvFile):
     """
     Returns the path to the directory containing the csv file
     """
-    return os.path.dirname(csv)
+    return os.path.dirname(csvFile)
 
 
 def change_csv(csv_file):
@@ -69,15 +73,22 @@ def change_csv(csv_file):
         writer.writerows(input_data)
 
 
-def get_data(csv):
+def get_data(file_path, delimiter=';'):
     """
-    Returns the first and second columns of a csv file as a list of tuples
+    Returns the first and second columns of a CSV file as a list of tuples.
     """
     data = []
-    with open(csv, 'r') as f:
-        for line in f:
-            line = line.strip().split(';')
-            data.append((get_dir(csv) + "/" + line[0], line[1].strip('"')))
+
+    with open(file_path, 'r', newline='') as csvfile:
+        csv_reader = csv.reader(csvfile, delimiter=delimiter)
+        # Get path of csv file
+        
+        fileDir = os.path.dirname(file_path)
+        
+        for row in csv_reader:
+            if len(row) >= 2:
+                data.append((fileDir + "/" + row[0], row[1]))
+
     return data
 
 
@@ -86,6 +97,74 @@ def combineCsvs(get_data, csvs):
     Combine all csv data into one list of tuples, each tuple is (path, text)
     """
     data = []
-    for csv in csvs:
-        data += get_data(csv)
+    for c in csvs:
+        data += get_data(c)
     return data
+
+
+def insert_value_in_third_column(file_path, search_value, new_value, delimiter=';'):
+    data = []
+
+    # Read the CSV file and store the content in a list
+    with open(file_path, 'r', newline='') as csvfile:
+        csv_reader = csv.reader(csvfile, delimiter=delimiter)
+        for row in csv_reader:
+            data.append(row)
+
+    # Find the row based on the first column value and insert the new value in the third column
+    for row in data:
+        if row[0] == search_value:
+            if len(row) < 3:
+                row.extend([None] * (3 - len(row)))  # Extend the row to have at least 3 columns
+            row[2] = new_value
+
+    # Write the modified content back to the CSV file
+    with open(file_path, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile, delimiter=delimiter)
+        for row in data:
+            csv_writer.writerow(row)
+
+def get_value_from_third_column(file_path, search_value, delimiter=';'):
+    data = []
+
+    # Read the CSV file and store the content in a list
+    with open(file_path, 'r', newline='') as csvfile:
+        csv_reader = csv.reader(csvfile, delimiter=delimiter)
+        for row in csv_reader:
+            data.append(row)
+
+    # Find the row based on the first column value and insert the new value in the third column
+    for row in data:
+        if row[0] == search_value:
+            if len(row) < 3:
+                row.extend([None] * (3 - len(row)))  # Extend the row to have at least 3 columns
+            return row[2]
+
+    return None
+
+
+def tuples_to_csv(tuples_list, file_name):
+    with open(file_name, 'w', newline='') as theFile:
+        csv_writer = csv.writer(theFile, delimiter=';')
+        for row in tuples_list:
+            csv_writer.writerow(row)
+
+
+def get_all_files_to_edit_manually(all_data):
+    files_to_edit_manually = []
+    with open(all_data, 'r', newline='') as csvfile:
+        csv_reader = csv.reader(csvfile, delimiter=';')
+        for row in csv_reader:
+            if row[2] == 'e':
+                files_to_edit_manually.append(row[0])
+    return files_to_edit_manually
+
+
+def generate_sound_file(d, phrase):
+    audio_array = generate_audio(
+            phrase, history_prompt="en_speaker_6", waveform_temp=0.1)
+    audio_array_16bit = np.int16(audio_array * 32767)
+    write_wav(d[0], SAMPLE_RATE, audio_array_16bit)
+    remove_silence_from_audio(d[0], d[0])
+    wave_obj = sa.WaveObject.from_wave_file(d[0])
+    return wave_obj
