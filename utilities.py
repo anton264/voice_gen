@@ -102,7 +102,7 @@ def combineCsvs(get_data, csvs):
     return data
 
 
-def insert_value_in_third_column(file_path, search_value, new_value, delimiter=';'):
+def insert_value_in_column(file_path, search_value, new_value, column_number, delimiter=';'):
     data = []
 
     # Read the CSV file and store the content in a list
@@ -111,20 +111,19 @@ def insert_value_in_third_column(file_path, search_value, new_value, delimiter='
         for row in csv_reader:
             data.append(row)
 
-    # Find the row based on the first column value and insert the new value in the third column
+    # Find the row based on the first column value and insert the new value in the specified column
     for row in data:
         if row[0] == search_value:
-            if len(row) < 3:
-                row.extend([None] * (3 - len(row)))  # Extend the row to have at least 3 columns
-            row[2] = new_value
+            if len(row) < column_number:
+                row.extend([None] * (column_number - len(row)))  # Extend the row to have at least column_number columns
+            row[column_number - 1] = new_value
 
-    # Write the modified content back to the CSV file
+    # Write the updated data to the CSV file
     with open(file_path, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile, delimiter=delimiter)
-        for row in data:
-            csv_writer.writerow(row)
+        csv_writer.writerows(data)
 
-def get_value_from_third_column(file_path, search_value, delimiter=';'):
+def get_value_from_column(file_path, search_value, column_number, delimiter=';'):
     data = []
 
     # Read the CSV file and store the content in a list
@@ -133,12 +132,13 @@ def get_value_from_third_column(file_path, search_value, delimiter=';'):
         for row in csv_reader:
             data.append(row)
 
-    # Find the row based on the first column value and insert the new value in the third column
+    # Find the row based on the first column value and return the value from the specified column
     for row in data:
         if row[0] == search_value:
-            if len(row) < 3:
-                row.extend([None] * (3 - len(row)))  # Extend the row to have at least 3 columns
-            return row[2]
+            if len(row) < column_number:
+                return None  # The row doesn't have the specified column, return None
+            else:
+                return row[column_number - 1]
 
     return None
 
@@ -160,11 +160,43 @@ def get_all_files_to_edit_manually(all_data):
     return files_to_edit_manually
 
 
-def generate_sound_file(d, phrase):
+def generate_sound_file(d, phrase, voice_waveform_temp=0.7, speaker_voice="en_speaker_6"):
     audio_array = generate_audio(
-            phrase, history_prompt="en_speaker_6", waveform_temp=0.1)
+            phrase, history_prompt=speaker_voice, waveform_temp=voice_waveform_temp)
     audio_array_16bit = np.int16(audio_array * 32767)
-    write_wav(d[0], SAMPLE_RATE, audio_array_16bit)
-    remove_silence_from_audio(d[0], d[0])
-    wave_obj = sa.WaveObject.from_wave_file(d[0])
+    write_wav(d, SAMPLE_RATE, audio_array_16bit)
+    remove_silence_from_audio(d, d)
+    wave_obj = sa.WaveObject.from_wave_file(d)
     return wave_obj
+
+
+# Check if all_data.csvfile exists, if it does compare length of data and all_data
+def create_or_reuse_csv_with_all_data(data, all_data_path):
+    if os.path.isfile(all_data_path):
+        with open(all_data_path, 'r', newline='') as csvfile:
+            all_data_length = sum(1 for row in csv.reader(csvfile, delimiter=';'))
+            data_length = len(data)
+            if all_data_length != data_length:
+                print(
+                f"Length of data and all_data.csvfile are not equal, \n"
+                f"the length of all_data.csvfile is {all_data_length} and the length of data is {data_length}"
+                f"\nthis means that there is a mismatch between all the subtitles.csv files and the aggregated all_data.csvfile,"
+                f"\nyou need to manually check if the data is correct and then delete or edit the all_data.csvfile and run this script again"
+            )
+                exit()
+            else:
+                print("Length of data and all_data.csvfile are equal, skipping creation of all_data.csvfile")
+    else:
+        print("all_data.csvfile does not exist, creating it")
+        tuples_to_csv(data, all_data_path)
+
+
+def play_sound_and_get_feedback_from_human(phrase, wave_obj):
+    play_obj = wave_obj.play()
+    play_obj.wait_done()
+    user_input = input(
+        f'The phrase is: \n\n "{phrase}"\n\nAre you happy with the sound? \n'
+        f'(y)es\n(n)o (Re-generate)\n(r)eplay\n(e)dit manually later): '
+    ).lower()
+
+    return user_input
