@@ -12,7 +12,7 @@ from scipy.io.wavfile import write as write_wav
 
 
 def remove_silence_from_audio(audio_file_path, output_file_path, silence_threshold=-40.0, min_silence_len=100):
-    print(f"Removing silence {audio_file_path} -> {output_file_path}...")
+    #print(f"Removing silence {audio_file_path} -> {output_file_path}...")
     audio = AudioSegment.from_wav(audio_file_path)
     non_silent_ranges = detect_nonsilent(audio, min_silence_len, silence_threshold)
 
