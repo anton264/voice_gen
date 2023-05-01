@@ -1,5 +1,6 @@
 import re
 import whisper
+import string
 from pyphonetics import Metaphone
 from fuzzywuzzy import fuzz
 from num2words import num2words
@@ -9,6 +10,7 @@ def perform_voice_recognition(file_path):
     """
     Performs voice recognition on a given file path and returns the text
     """
+    print("👂 Loading voice model...")
     model = whisper.load_model("base")
 # load audio and pad/trim it to fit 30 seconds
     audio = whisper.load_audio(file_path)
@@ -25,16 +27,32 @@ def get_similarity_score(text: str, expected_result: str) -> int:
     """
     Returns a number between 0 and 100, where 100 is a perfect match
     """
-    metaphone = Metaphone()   
-    text = convert_number_to_words(text)
-    expected_result = convert_number_to_words(expected_result)
-    text = remove_special_chars(text)
-    expected_result = remove_special_chars(expected_result)
-    # Compare with metaphone phonetics
-    match = fuzz.ratio(metaphone.phonetics(text), metaphone.phonetics(expected_result))
+    if text is None or expected_result is None:
+        return 0
+
+    try:
+        metaphone = Metaphone()
+        text = remove_trailing_special_chars(text) or ""
+        expected_result = remove_trailing_special_chars(expected_result) or ""
+        text = convert_number_to_words(text) or ""
+        expected_result = convert_number_to_words(expected_result) or ""
+        text = remove_special_chars(text) or ""
+        expected_result = remove_special_chars(expected_result) or ""
+        text = metaphone.phonetics(text) or ""
+        expected_result = metaphone.phonetics(expected_result) or ""
+        # Compare with metaphone phonetics
+        match = fuzz.ratio(text, expected_result)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        match = 0
+
     return match
 
+
 def convert_number_to_words(s: str) -> str:
+    """
+    Converts numbers in a string to words, e.g. "1" becomes "one"
+    """
     def is_number(word: str) -> bool:
         return re.match(r'^-?\d+(\.\d+)?$', word)
 
@@ -59,4 +77,20 @@ def remove_special_chars(text: str) -> str:
     """
     Removes special characters and punctuation from the input string.
     """
-    return re.sub(r"[^\w\s]", "", text)    
+    return re.sub(r"[^\w\s]", "", text)
+
+
+def remove_trailing_special_chars(input_str):
+    # Define the allowed characters (alnum: alphanumeric characters)
+    allowed_chars = set(string.ascii_letters +
+                        string.digits + string.whitespace)
+
+    # Find the last allowed character index
+    last_allowed_char_index = len(input_str)
+    for index, char in enumerate(reversed(input_str)):
+        if char in allowed_chars:
+            last_allowed_char_index = len(input_str) - index
+            break
+
+    # Slice the input string up to the last allowed character index
+    return input_str[:last_allowed_char_index]
