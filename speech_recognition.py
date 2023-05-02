@@ -6,22 +6,33 @@ from fuzzywuzzy import fuzz
 from num2words import num2words
 
 
-def perform_voice_recognition(file_path):
+def perform_voice_recognition(file_path, model):
     """
     Performs voice recognition on a given file path and returns the text
+    It will automatically detect the language
     """
-    print("👂 Loading voice model...")
-    model = whisper.load_model("base")
-# load audio and pad/trim it to fit 30 seconds
+    # load audio and pad/trim it to fit 30 seconds
     audio = whisper.load_audio(file_path)
     audio = whisper.pad_or_trim(audio)
-# make log-Mel spectrogram and move to the same device as the model
+
+    # make log-Mel spectrogram and move to the same device as the model
     mel = whisper.log_mel_spectrogram(audio).to(model.device)
-# decode the audio
+
+    # decode the audio
     options = whisper.DecodingOptions()
     result = whisper.decode(model, mel, options)
     return result.text
 
+def perform_voice_recognition_with_specific_language(file_path, model):
+    """
+    Performs voice recognition on a given file path and returns the text
+    It uses the model with the specific language
+    """
+    #audio = whisper.load_audio(file_path)
+    #audio = whisper.pad_or_trim(audio)
+    #mel = whisper.log_mel_spectrogram(audio).to(model.device)
+    transcription = model.transcribe(file_path)
+    return transcription["text"]
 
 def get_similarity_score(text: str, expected_result: str) -> int:
     """
