@@ -1,42 +1,50 @@
 # README.md
 
-## Voice Generation with Scoring
+## Voice Generation with Quality Threshold
 
-This is a Python script that reads CSV files containing text phrases from a specified directory, generates audio files using the BARK and WHISPER libraries, and scores the quality of the generated audio based on the similarity between the expected and recognized phrases using Speech Recognition.
+This Python script generates voice clips using the BARK library and Whisper voice recognition model, ensuring the generated voices meet a specified quality threshold. The script processes CSV files containing phrases, generates voice clips for each phrase, and checks their quality using a voice recognition model. If the generated voice clip does not meet the quality threshold, the script retries until it reaches the maximum number of retries or finds a satisfactory voice clip.
 
 ### Dependencies
 
-- BARK
-- WHISPER
-- Speech Recognition
-- SciPy
-- NumPy
+- bark_ssg==1.3.4
+- fuzzywuzzy==0.18.0
+- num2words==0.5.10
+- numpy==1.20.3
+- openai_whisper==20230314
+- pydub==0.25.1
+- pyphonetics==0.5.3
+- scipy==1.7.3
+- simpleaudio==1.0.4
+
+### Installing Dependencies
+
+To install the required dependencies, run the following command:
+
+```bash
+pip install -r requirements.txt
+```
 
 ### Usage
 
-1. Set the working folder to the directory containing the CSV files with the text phrases.
-   ```
-   workfolder = 'D:/workdir2/corners'
-   ```
-2. Set the voice quality threshold and maximum number of retries for generating the audio files.
-   ```
-   voice_threshold = 90
-   max_retries = 20
-   ```
-3. Run the script. It will process the CSV files, generate the audio files, and score the quality of the generated audio.
+1. Set the working folder path in the `workfolder` variable.
+2. Set the quality threshold in the `voice_threshold` variable (minimum score for a sound to be considered good enough; the maximum score is 100).
+3. Set the maximum number of retries in the `max_retries` variable.
+4. Choose whether to use phonetics for text comparison in the `use_phonetics` variable (currently only works for English).
+5. Choose whether to keep files that failed to generate in the `keep_failed_files` variable.
+6. Run the script.
 
 ### How it Works
 
-1. The script loads the voice recognition and generation models.
-2. It finds all CSV files in the specified working folder and combines the data into one list.
-3. The script creates or reuses an existing CSV file to store the generated audio files' scores.
-4. It iterates through the list of phrases and generates audio files using the BARK library.
-5. For each generated audio file, the script performs voice recognition using the WHISPER library and calculates a similarity score based on the expected and recognized phrases.
-6. If the score is below the voice quality threshold, the script will generate a new audio file and retry voice recognition, up to the specified maximum number of retries.
-7. The best-scoring audio file for each phrase will be saved in the working folder, and the scores will be stored in the "all_data.csv" file.
+1. The script loads the Whisper voice recognition model.
+2. It loads the BARK voice generation models.
+3. It finds all CSV files in the specified working folder and combines their data into a list of tuples.
+4. It creates or reuses an existing CSV file to store information about the generated voice clips.
+5. For each phrase, the script generates a voice clip and checks its quality using the voice recognition model.
+6. If the generated voice clip does not meet the quality threshold, the script retries until it reaches the maximum number of retries or finds a satisfactory voice clip.
+7. It updates the information in the CSV file accordingly.
 
 ### Notes
 
-- This script requires the BARK and WHISPER libraries to generate and recognize audio files. Ensure that they are installed and configured correctly.
-- The voice quality threshold and maximum number of retries can be adjusted to balance the quality and processing time for generating the audio files.
-- The script assumes the input CSV files contain phrases in the correct format. Ensure the CSV files are properly formatted before running the script.
+- The script requires the BARK library, Whisper voice recognition model, and other dependencies listed in the `requirements.txt` file. Ensure that they are installed and configured correctly.
+- Ensure that the working folder contains properly formatted CSV files with phrases to generate voice clips.
+- The generated voice clips will be saved in the specified working folder, and the information about their quality will be stored in an `all_data.csvfile`.

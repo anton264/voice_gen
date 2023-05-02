@@ -34,7 +34,7 @@ def perform_voice_recognition_with_specific_language(file_path, model):
     transcription = model.transcribe(file_path)
     return transcription["text"]
 
-def get_similarity_score(text: str, expected_result: str) -> int:
+def get_similarity_score(text: str, expected_result: str, phonetics=True) -> int:
     """
     Returns a number between 0 and 100, where 100 is a perfect match
     """
@@ -49,8 +49,9 @@ def get_similarity_score(text: str, expected_result: str) -> int:
         expected_result = convert_number_to_words(expected_result) or ""
         text = remove_special_chars(text) or ""
         expected_result = remove_special_chars(expected_result) or ""
-        text = metaphone.phonetics(text) or ""
-        expected_result = metaphone.phonetics(expected_result) or ""
+        if phonetics:
+            text = metaphone.phonetics(text) or ""
+            expected_result = metaphone.phonetics(expected_result) or ""
         # Compare with metaphone phonetics
         match = fuzz.ratio(text, expected_result)
     except Exception as e:
