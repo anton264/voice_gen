@@ -2,7 +2,22 @@
 
 ## Voice Generation with Quality Threshold
 
-This Python script generates voice clips using the BARK library and Whisper voice recognition model, ensuring the generated voices meet a specified quality threshold. The script processes CSV files containing phrases, generates voice clips for each phrase, and checks their quality using a voice recognition model. If the generated voice clip does not meet the quality threshold, the script retries until it reaches the maximum number of retries or finds a satisfactory voice clip.
+This Python script generates voice clips using the [BARK](https://github.com/suno-ai/bark) library and [Whisper](https://github.com/openai/whisper) voice recognition model, ensuring the generated voices meet a specified quality threshold. The script:
+- Processes CSV files containing phrases
+- Generates voice clips for each phrase
+- Checks their quality using a voice recognition model along with phonetics. 
+
+If the generated voice clip does not meet the quality threshold, the script retries until it reaches the maximum number of retries or finds a satisfactory voice clip. If a satisfactory voice clip is not produced, the highest scoring clip will be kept
+
+```mermaid
+graph TD
+A[Generate voice clip] --> B[Check quality score]
+B -->|Below threshold| C[Retry]
+B -->|Above threshold| D[Keep voice clip]
+C -->|Max retries reached| E[Keep highest scoring clip]
+C --> A
+```
+
 
 ### Dependencies
 
@@ -26,7 +41,10 @@ pip install -r requirements.txt
 
 ### Usage
 
-1. Set the working folder path in the `workfolder` variable.
+1. Save all your desired voice clips in a csv. Each row should follow this concention `file_name.wav;This is the phrase I want to hear`
+For every row in the csv the script will generate a file in the same folder.
+1. Make sure that no soundfiles are already present, if they are, the script will evaluate that sound file instead. This is benefitial for reruns but if you are converting from one voice to another it will cause issues since the current file will be kept.
+1. Open `create_all.py`. Set the working folder path in the `workfolder` variable. It should be the top folder of all csv-files. All subdirectories regardless of how deep they are nested will be searched by the script.
 2. Set the quality threshold in the `voice_threshold` variable (minimum score for a sound to be considered good enough; the maximum score is 100).
 3. Set the maximum number of retries in the `max_retries` variable.
 4. Choose whether to use phonetics for text comparison in the `use_phonetics` variable (currently only works for English).
