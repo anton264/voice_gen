@@ -3,7 +3,8 @@ from scipy.io.wavfile import write as write_wav
 import os
 import shutil
 import whisper
-from utilities import combineCsvs, create_or_reuse_csv_with_all_data, find_csvs, get_data, insert_value_in_column, generate_sound_file, get_value_from_column
+from utilities import combineCsvs, create_or_reuse_csv_with_all_data, find_csvs, get_data, insert_value_in_column, \
+    generate_sound_file, get_value_from_column
 import speech_recognition as sr
 
 os.system("cls")
@@ -15,14 +16,20 @@ voice_recognition_model = whisper.load_model("base")
 print("🗣️  Loading voice generation models...")
 preload_models()
 
-
 # Looks through all subdirectories of a path and returns the paths to every csv file with forward slash
-workfolder = 'D:/workdir2/corners'
-voice_threshold = 90
-max_retries = 20
+workfolder = 'D:/workdir3/anton'
+# The minimum score for a sound to be considered good enough, the maximum score is 100
+voice_threshold = 70
+max_retries = 5
+# If true, the voice recognition will use phonetics to compare the text, otherwise it will use the text directly
+# Currently only works for English
+use_phonetics = True
+
+# If true, the program will keep the files that failed to generate,
+# this can be useful if you want to manually go through the files find the one that you like the most
+keep_failed_files = False
 
 csvs = find_csvs(workfolder)
-
 
 # Combine all csv data into one list of tuples, each tuple is (path, text)
 data = combineCsvs(get_data, csvs)
@@ -45,7 +52,6 @@ for item in data:
         print(
             f"✅ Skipping {file_path} because it already has a score of {previous_score}, which is above the threshold of {voice_threshold}")
         continue
-
     score = 0
     # Check if the file already exists, if it does, check the score and update previous_score
     if os.path.isfile(file_path) and previous_score == 0:
@@ -68,7 +74,7 @@ for item in data:
         recognized_phrase = sr.perform_voice_recognition(
             temp_file_path, voice_recognition_model)
         score = sr.get_similarity_score(
-            recognized_phrase.lower(), expected_phrase.lower())
+            recognized_phrase.lower(), expected_phrase.lower(), use_phonetics)
         retries += 1
 
         # Update max_score and max_score_path
@@ -80,12 +86,14 @@ for item in data:
                 shutil.copy(max_score_path, file_path)
                 # Save score to csv
                 insert_value_in_column(all_data_path, file_path, max_score, 4)
-        # Delete the temp file, it has served its purpose
-        os.remove(temp_file_path)
-        
-        
-        print(f"""💬 The file: {temp_file_path}\n👂 I heard: {recognized_phrase} \n📖 It should be: {expected_phrase} \n💯 It scored: {score} points\n🔢 This was attempt number {retries} out of {max_retries}\n🔂 The best attempt so far got a score of {max_score}""")
+        # Delete the temp file if keep_failed_files is false
+        if not keep_failed_files:
+            os.remove(temp_file_path)
+
+        print(
+            f"""💬 The file: {temp_file_path}\n👂 I heard: {recognized_phrase} \n📖 It should be: {expected_phrase} \n💯 It scored: {score} points\n🔢 This was attempt number {retries} out of {max_retries}\n🔂 The best attempt so far got a score of {max_score}""")
         if retries >= max_retries:
-            print(f"🚫 The phrase: {expected_phrase} was skipped because it failed to reach the threshold of {voice_threshold} after {max_retries} retries\n🔂 The best attempt got a score of {max_score}")
+            print(
+                f"🚫 The phrase: {expected_phrase} was skipped because it failed to reach the threshold of {voice_threshold} after {max_retries} retries\n🔂 The best attempt got a score of {max_score}")
             break
     insert_value_in_column(all_data_path, file_path, max_score, 4)
