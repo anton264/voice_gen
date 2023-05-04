@@ -7,14 +7,8 @@ from utilities import combineCsvs, create_or_reuse_csv_with_all_data, find_csvs,
     generate_sound_file, get_value_from_column
 import speech_recognition as sr
 
-os.system("cls")
-print("👂 Loading voice recognition models...")
-# voice_recognition_model = whisper.load_model("base.en")
-voice_recognition_model = whisper.load_model("base")
 
-# Download and load all voice models
-print("🗣️  Loading voice generation models...")
-preload_models()
+# ⚙️⚙️⚙️  SETTINGS SECTION ⚙️⚙️⚙️
 
 # Looks through all subdirectories of a path and returns the paths to every csv file with forward slash
 workfolder = 'D:/workdir3/voice'
@@ -25,17 +19,27 @@ max_retries = 5
 # Currently only works for English
 use_phonetics = True
 
-# If true, the program will keep the files that failed to generate,
+# If true, the program will keep the files that failed to reach the threshold,
 # this can be useful if you want to manually go through the files find the one that you like the most
 keep_failed_files = False
+
+# ⚙️⚙️⚙️  END OF SETTINGS SECTION ⚙️⚙️⚙️
+
+os.system("cls")
+print("👂 Loading voice recognition models...")
+# voice_recognition_model = whisper.load_model("base.en")
+voice_recognition_model = whisper.load_model("base")
+
+# Download and load all voice models
+print("🗣️  Loading voice generation models...")
+preload_models()
 
 csvs = find_csvs(workfolder)
 
 # Combine all csv data into one list of tuples, each tuple is (path, text)
 data = combineCsvs(get_data, csvs)
 
-file_dir = workfolder
-all_data_path = os.path.join(file_dir, "all_data.csvfile")
+all_data_path = os.path.join(workfolder, "all_data.csvfile")
 
 create_or_reuse_csv_with_all_data(data, all_data_path)
 
