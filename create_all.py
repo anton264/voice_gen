@@ -12,6 +12,12 @@ import speech_recognition as sr
 
 # Looks through all subdirectories of a path and returns the paths to every csv file with forward slash
 workfolder = 'D:/workdir3/voice'
+
+# This is the voice the generator will use
+# A list of voices can be found here:
+# https://github.com/suno-ai/bark/tree/main/bark/assets/prompts
+# If you want to use a V2 voice it should be formatted as: v2/en_speaker_6
+speaker_voice="en_speaker_6"
 # The minimum score for a sound to be considered good enough, the maximum score is 100
 # It is recommended to start around 60-70 for a first run and increase for reruns.
 # Note that the higher the threshold the less creative freedom is allowed,
