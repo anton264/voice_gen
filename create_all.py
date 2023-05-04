@@ -13,7 +13,11 @@ import speech_recognition as sr
 # Looks through all subdirectories of a path and returns the paths to every csv file with forward slash
 workfolder = 'D:/workdir3/voice'
 # The minimum score for a sound to be considered good enough, the maximum score is 100
+# It is recommended to start around 60-70 for a first run and increase for reruns.
+# Note that the higher the threshold the less creative freedom is allowed,
+# meaning that at threshold 100 the phase have to match perfectly.
 voice_threshold = 70
+# How many retries should be done for each sound.
 max_retries = 5
 # If true, the voice recognition will use phonetics to compare the text, otherwise it will use the text directly
 # Currently only works for English
