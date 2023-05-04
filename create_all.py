@@ -17,7 +17,7 @@ print("🗣️  Loading voice generation models...")
 preload_models()
 
 # Looks through all subdirectories of a path and returns the paths to every csv file with forward slash
-workfolder = 'D:/workdir3/anton'
+workfolder = 'D:/workdir3/voice'
 # The minimum score for a sound to be considered good enough, the maximum score is 100
 voice_threshold = 70
 max_retries = 5
