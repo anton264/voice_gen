@@ -57,9 +57,20 @@ For every row in the csv the script will generate a file in the same folder.
 2. It loads the BARK voice generation models.
 3. It finds all CSV files in the specified working folder and combines their data into a list of tuples.
 4. It creates or reuses an existing CSV file to store information about the generated voice clips.
+```mermaid
+graph TD
+A[Check if allDataCsv exists] -->|Yes| B[Open allDataCsv]
+A -->|No| C[Create allDataCsv]
+B --> D[Compare allDataCsv length and data_length]
+D -->|Equal| E[Skip creation of allDataCsv]
+D -->|Not equal| F[Print error message and exit]
+C --> G[Write data to allDataCsv]
+```
 5. For each phrase, the script generates a voice clip and checks its quality using the voice recognition model.
 6. If the generated voice clip does not meet the quality threshold, the script retries until it reaches the maximum number of retries or finds a satisfactory voice clip.
 7. It updates the information in the CSV file accordingly.
+
+
 
 ### Notes
 
