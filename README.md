@@ -44,7 +44,7 @@ pip install -r requirements.txt
 1. Save all your desired voice clips in a csv. Each row should follow this convention `file_name.wav;This is the phrase I want to hear`. You can check the `Templates`folders in this repo for examples.
 For every row in the csv the script will generate a file in the same folder.
 1. Make sure that no soundfiles are already present, if they are, the script will evaluate that sound file instead. This is benefitial for reruns but if you are converting from one voice to another it will cause issues since the current file will be kept.
-1. Open `create_all.py`. Set the working folder path in the `workfolder` variable. It should be the top folder of all csv-files. All subdirectories regardless of how deep they are nested will be searched by the script. *Windows users: Change backslash in the path to forward-slash*
+1. Open `create_all.py`. Set the working folder path in the `workfolder` variable. It should be the top folder of all csv-files. All subdirectories regardless of how deep they are nested will be searched by the script. **Windows users: Change backslash in the path to forward-slash**
 2. Set the quality threshold in the `voice_threshold` variable (minimum score for a sound to be considered good enough; the maximum score is 100).
 3. Set the maximum number of retries in the `max_retries` variable.
 4. Choose whether to use phonetics for text comparison in the `use_phonetics` variable (currently only works for English).
