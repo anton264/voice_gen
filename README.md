@@ -66,9 +66,9 @@ D -->|Equal| E[Skip creation of allDataCsv]
 D -->|Not equal| F[Print error message and exit]
 C --> G[Write data to allDataCsv]
 ```
-5. For each phrase, the script generates a voice clip and checks its quality using the voice recognition model.
-6. If the generated voice clip does not meet the quality threshold, the script retries until it reaches the maximum number of retries or finds a satisfactory voice clip.
-7. It updates the information in the CSV file accordingly.
+5. For each phrase, the script generates a sound file and checks its score using the voice recognition model.
+6. If the generated sound file does not meet the quality threshold, the script retries until it reaches the maximum number of retries or finds a satisfactory sound file.
+7. It updates the score in the CSV file accordingly.
 
 
 
