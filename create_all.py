@@ -19,7 +19,7 @@ preload_models()
 # Looks through all subdirectories of a path and returns the paths to every csv file with forward slash
 workfolder = 'D:/workdir2/corners'
 voice_threshold = 90
-max_retries = 20
+max_retries = 5
 
 csvs = find_csvs(workfolder)
 
