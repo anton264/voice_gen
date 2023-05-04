@@ -2,10 +2,11 @@
 
 ## Voice Generation with Quality Threshold
 
-This Python script generates voice clips using the [BARK](https://github.com/suno-ai/bark) library and [Whisper](https://github.com/openai/whisper) voice recognition model, ensuring the generated voices meet a specified quality threshold. The script:
+This Python script generates voice clips using the [BARK](https://github.com/suno-ai/bark) library and [Whisper](https://github.com/openai/whisper) voice recognition model, ensuring the generated voices meet a specified quality threshold. The script `create_all.py`:
+
 - Processes CSV files containing phrases
 - Generates voice clips for each phrase
-- Checks their quality using a voice recognition model along with phonetics. 
+- Checks their quality using a voice recognition model along with phonetics.
 
 If the generated voice clip does not meet the quality threshold, the script retries until it reaches the maximum number of retries or finds a satisfactory voice clip. If a satisfactory voice clip is not produced, the highest scoring clip will be kept
 
@@ -17,7 +18,6 @@ B -->|Above threshold| D[Keep voice clip]
 C -->|Max retries reached| E[Keep highest scoring clip]
 C --> A
 ```
-
 
 ### Dependencies
 
