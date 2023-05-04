@@ -49,16 +49,16 @@ csvs = find_csvs(workfolder)
 # Combine all csv data into one list of tuples, each tuple is (path, text)
 data = combineCsvs(get_data, csvs)
 
-all_data_path = os.path.join(workfolder, "all_data.csvfile")
+all_data_csv = os.path.join(workfolder, "all_data.csvfile")
 
-create_or_reuse_csv_with_all_data(data, all_data_path)
+create_or_reuse_csv_with_all_data(data, all_data_csv)
 
 # Create audio files from the data
 for item in data:
     file_path, expected_phrase = item
 
     # Check if the file already has a score
-    raw_value = get_value_from_column(all_data_path, file_path, 4)
+    raw_value = get_value_from_column(all_data_csv, file_path, 4)
     previous_score = int(raw_value) if raw_value is not None else 0
 
     # Skip if the score is already above voice_threshold
@@ -80,7 +80,7 @@ for item in data:
     retries = 0
     max_score = score
     max_score_path = file_path
-    insert_value_in_column(all_data_path, file_path, max_score, 4)
+    insert_value_in_column(all_data_csv, file_path, max_score, 4)
 
     while score < voice_threshold:
         temp_file_path = f"{file_path[:-4]}_{retries}.wav"
@@ -99,7 +99,7 @@ for item in data:
             if score > previous_score:
                 shutil.copy(max_score_path, file_path)
                 # Save score to csv
-                insert_value_in_column(all_data_path, file_path, max_score, 4)
+                insert_value_in_column(all_data_csv, file_path, max_score, 4)
         # Delete the temp file if keep_failed_files is false
         if not keep_failed_files:
             os.remove(temp_file_path)
@@ -110,4 +110,4 @@ for item in data:
             print(
                 f"🚫 The phrase: {expected_phrase} was skipped because it failed to reach the threshold of {voice_threshold} after {max_retries} retries\n🔂 The best attempt got a score of {max_score}")
             break
-    insert_value_in_column(all_data_path, file_path, max_score, 4)
+    insert_value_in_column(all_data_csv, file_path, max_score, 4)

@@ -77,3 +77,33 @@ C --> G[Write data to allDataCsv]
 - The script requires the BARK library, Whisper voice recognition model, and other dependencies listed in the `requirements.txt` file. Ensure that they are installed and configured correctly.
 - Ensure that the working folder contains properly formatted CSV files with phrases to generate voice clips.
 - The generated voice clips will be saved in the specified working folder, and the information about their quality will be stored in an `all_data.csvfile`.
+
+
+### Flowchart
+
+Below is a flowchart for how the script loops through data
+
+```mermaid
+graph TD
+A[Loop through data] --> B[Get file_path and expected_phrase]
+B --> C[Get previous_score from all_data_csv]
+C --> D[Check if previous_score >= voice_threshold]
+D -->|Yes| E[Skip file]
+D -->|No| F[Check if file_path exists and previous_score == 0]
+F -->|Yes| G[Perform voice recognition and get score]
+F -->|No| I[Set score to 0]
+G --> I[Set max_score and max_score_path]
+I --> J[Insert max_score in all_data_csv]
+J --> K[Check if score < voice_threshold]
+K -->|Yes| L[Generate sound file]
+K -->|No -The file was satisfactory| A
+L --> M[Perform voice recognition and get score]
+M --> N[Increment retries]
+N --> O[Check if score > max_score]
+O -->|Yes| P[Update max_score and max_score_path]
+O -->|No| K
+P --> Q[Check if score > previous_score]
+Q -->|Yes| R[Copy max_score_path to file_path]
+Q -->|No| K
+R --> K
+```
